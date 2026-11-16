@@ -1,0 +1,362 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Savia" Width="1060" Height="700" WindowStyle="None" AllowsTransparency="True"
+        Background="Transparent" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen"
+        FontFamily="Segoe UI Variable Display, Segoe UI" Foreground="#EDE8DF" UseLayoutRounding="True">
+  <Window.Resources>
+    <SolidColorBrush x:Key="Muted" Color="#8C877C"/>
+    <SolidColorBrush x:Key="Line"  Color="#2C2B26"/>
+
+    <!-- Botón principal: píldora que crece con un pequeño rebote -->
+    <Style x:Key="Pill" TargetType="Button">
+      <Setter Property="Foreground" Value="#151511"/>
+      <Setter Property="FontSize" Value="15"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="b" CornerRadius="26" Padding="30,14" RenderTransformOrigin="0.5,0.5">
+              <Border.Background><SolidColorBrush Color="#A9C29B"/></Border.Background>
+              <Border.RenderTransform><ScaleTransform/></Border.RenderTransform>
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Trigger.EnterActions><BeginStoryboard><Storyboard>
+                  <ColorAnimation Storyboard.TargetName="b" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#C4D9B6" Duration="0:0:0.25"/>
+                  <DoubleAnimation Storyboard.TargetName="b" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.04" Duration="0:0:0.45"><DoubleAnimation.EasingFunction><BackEase Amplitude="0.5" EasingMode="EaseOut"/></DoubleAnimation.EasingFunction></DoubleAnimation>
+                  <DoubleAnimation Storyboard.TargetName="b" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.04" Duration="0:0:0.45"><DoubleAnimation.EasingFunction><BackEase Amplitude="0.5" EasingMode="EaseOut"/></DoubleAnimation.EasingFunction></DoubleAnimation>
+                </Storyboard></BeginStoryboard></Trigger.EnterActions>
+                <Trigger.ExitActions><BeginStoryboard><Storyboard>
+                  <ColorAnimation Storyboard.TargetName="b" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#A9C29B" Duration="0:0:0.35"/>
+                  <DoubleAnimation Storyboard.TargetName="b" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.4"><DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction></DoubleAnimation>
+                  <DoubleAnimation Storyboard.TargetName="b" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.4"><DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction></DoubleAnimation>
+                </Storyboard></BeginStoryboard></Trigger.ExitActions>
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Trigger.EnterActions><BeginStoryboard><Storyboard>
+                  <DoubleAnimation Storyboard.TargetName="b" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="0.96" Duration="0:0:0.12"/>
+                  <DoubleAnimation Storyboard.TargetName="b" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="0.96" Duration="0:0:0.12"/>
+                </Storyboard></BeginStoryboard></Trigger.EnterActions>
+                <Trigger.ExitActions><BeginStoryboard><Storyboard>
+                  <DoubleAnimation Storyboard.TargetName="b" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.04" Duration="0:0:0.3"><DoubleAnimation.EasingFunction><BackEase Amplitude="0.6" EasingMode="EaseOut"/></DoubleAnimation.EasingFunction></DoubleAnimation>
+                  <DoubleAnimation Storyboard.TargetName="b" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.04" Duration="0:0:0.3"><DoubleAnimation.EasingFunction><BackEase Amplitude="0.6" EasingMode="EaseOut"/></DoubleAnimation.EasingFunction></DoubleAnimation>
+                </Storyboard></BeginStoryboard></Trigger.ExitActions>
+              </Trigger>
+              <Trigger Property="IsEnabled" Value="False"><Setter TargetName="b" Property="Opacity" Value="0.35"/></Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- Botón secundario: texto que se ilumina sobre un fondo suave -->
+    <Style x:Key="Ghost" TargetType="Button">
+      <Setter Property="Foreground" Value="#8C877C"/>
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="b" CornerRadius="18" Padding="18,10">
+              <Border.Background><SolidColorBrush Color="#00EDE8DF"/></Border.Background>
+              <ContentPresenter x:Name="c" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Trigger.EnterActions><BeginStoryboard><Storyboard>
+                  <ColorAnimation Storyboard.TargetName="b" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#14EDE8DF" Duration="0:0:0.25"/>
+                </Storyboard></BeginStoryboard></Trigger.EnterActions>
+                <Trigger.ExitActions><BeginStoryboard><Storyboard>
+                  <ColorAnimation Storyboard.TargetName="b" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#00EDE8DF" Duration="0:0:0.35"/>
+                </Storyboard></BeginStoryboard></Trigger.ExitActions>
+                <Setter Property="Foreground" Value="#EDE8DF"/>
+              </Trigger>
+              <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.4"/></Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- Botones de ventana: puntos que se expanden -->
+    <Style x:Key="Dot" TargetType="Button">
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Width" Value="30"/><Setter Property="Height" Value="30"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Grid Background="Transparent">
+              <Ellipse x:Name="e" Width="11" Height="11" Fill="{TemplateBinding Background}" RenderTransformOrigin="0.5,0.5">
+                <Ellipse.RenderTransform><ScaleTransform/></Ellipse.RenderTransform>
+              </Ellipse>
+            </Grid>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Trigger.EnterActions><BeginStoryboard><Storyboard>
+                  <DoubleAnimation Storyboard.TargetName="e" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.45" Duration="0:0:0.3"><DoubleAnimation.EasingFunction><BackEase Amplitude="0.8" EasingMode="EaseOut"/></DoubleAnimation.EasingFunction></DoubleAnimation>
+                  <DoubleAnimation Storyboard.TargetName="e" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.45" Duration="0:0:0.3"><DoubleAnimation.EasingFunction><BackEase Amplitude="0.8" EasingMode="EaseOut"/></DoubleAnimation.EasingFunction></DoubleAnimation>
+                </Storyboard></BeginStoryboard></Trigger.EnterActions>
+                <Trigger.ExitActions><BeginStoryboard><Storyboard>
+                  <DoubleAnimation Storyboard.TargetName="e" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.3"/>
+                  <DoubleAnimation Storyboard.TargetName="e" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.3"/>
+                </Storyboard></BeginStoryboard></Trigger.ExitActions>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- Tarjetas de perfil -->
+    <Style x:Key="Card" TargetType="RadioButton">
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="RadioButton">
+            <Grid Margin="0,0,14,0">
+              <Grid.RenderTransform><TranslateTransform x:Name="t"/></Grid.RenderTransform>
+              <Border x:Name="b" CornerRadius="24" BorderThickness="1" Padding="22,22,22,20">
+                <Border.Background><SolidColorBrush Color="#1A1A17"/></Border.Background>
+                <Border.BorderBrush><SolidColorBrush Color="#2C2B26"/></Border.BorderBrush>
+                <Grid>
+                  <Ellipse x:Name="dot" Width="9" Height="9" Fill="#A9C29B" HorizontalAlignment="Right" VerticalAlignment="Top" Opacity="0" RenderTransformOrigin="0.5,0.5">
+                    <Ellipse.RenderTransform><ScaleTransform ScaleX="0" ScaleY="0"/></Ellipse.RenderTransform>
+                  </Ellipse>
+                  <ContentPresenter/>
+                </Grid>
+              </Border>
+              <Border x:Name="hl" CornerRadius="24" Background="#0BEDE8DF" Opacity="0" IsHitTestVisible="False"/>
+            </Grid>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Trigger.EnterActions><BeginStoryboard><Storyboard>
+                  <DoubleAnimation Storyboard.TargetName="t" Storyboard.TargetProperty="Y" To="-5" Duration="0:0:0.45"><DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction></DoubleAnimation>
+                  <DoubleAnimation Storyboard.TargetName="hl" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.3"/>
+                </Storyboard></BeginStoryboard></Trigger.EnterActions>
+                <Trigger.ExitActions><BeginStoryboard><Storyboard>
+                  <DoubleAnimation Storyboard.TargetName="t" Storyboard.TargetProperty="Y" To="0" Duration="0:0:0.5"><DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction></DoubleAnimation>
+                  <DoubleAnimation Storyboard.TargetName="hl" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.4"/>
+                </Storyboard></BeginStoryboard></Trigger.ExitActions>
+              </Trigger>
+              <Trigger Property="IsChecked" Value="True">
+                <Trigger.EnterActions><BeginStoryboard><Storyboard>
+                  <ColorAnimation Storyboard.TargetName="b" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#7E9672" Duration="0:0:0.35"/>
+                  <ColorAnimation Storyboard.TargetName="b" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#1E221B" Duration="0:0:0.35"/>
+                  <DoubleAnimation Storyboard.TargetName="dot" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                  <DoubleAnimation Storyboard.TargetName="dot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.5"><DoubleAnimation.EasingFunction><ElasticEase Oscillations="1" Springiness="4" EasingMode="EaseOut"/></DoubleAnimation.EasingFunction></DoubleAnimation>
+                  <DoubleAnimation Storyboard.TargetName="dot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.5"><DoubleAnimation.EasingFunction><ElasticEase Oscillations="1" Springiness="4" EasingMode="EaseOut"/></DoubleAnimation.EasingFunction></DoubleAnimation>
+                </Storyboard></BeginStoryboard></Trigger.EnterActions>
+                <Trigger.ExitActions><BeginStoryboard><Storyboard>
+                  <ColorAnimation Storyboard.TargetName="b" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#2C2B26" Duration="0:0:0.35"/>
+                  <ColorAnimation Storyboard.TargetName="b" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#1A1A17" Duration="0:0:0.35"/>
+                  <DoubleAnimation Storyboard.TargetName="dot" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
+                  <DoubleAnimation Storyboard.TargetName="dot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="0" Duration="0:0:0.2"/>
+                  <DoubleAnimation Storyboard.TargetName="dot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="0" Duration="0:0:0.2"/>
+                </Storyboard></BeginStoryboard></Trigger.ExitActions>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- Interruptor con la bolita que salta -->
+    <Style x:Key="Toggle" TargetType="CheckBox">
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Foreground" Value="#EDE8DF"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="CheckBox">
+            <Grid Background="Transparent">
+              <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+              <ContentPresenter VerticalAlignment="Center" Margin="0,0,16,0"/>
+              <Border x:Name="track" Grid.Column="1" Width="42" Height="24" CornerRadius="12" VerticalAlignment="Center">
+                <Border.Background><SolidColorBrush Color="#2E2D28"/></Border.Background>
+                <Ellipse x:Name="knob" Width="16" Height="16" Fill="#EDE8DF" HorizontalAlignment="Left" Margin="4,0,0,0">
+                  <Ellipse.RenderTransform><TranslateTransform/></Ellipse.RenderTransform>
+                </Ellipse>
+              </Border>
+            </Grid>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsChecked" Value="True">
+                <Trigger.EnterActions><BeginStoryboard><Storyboard>
+                  <ColorAnimation Storyboard.TargetName="track" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#A9C29B" Duration="0:0:0.3"/>
+                  <ColorAnimation Storyboard.TargetName="knob" Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" To="#151511" Duration="0:0:0.3"/>
+                  <DoubleAnimation Storyboard.TargetName="knob" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" To="18" Duration="0:0:0.45"><DoubleAnimation.EasingFunction><BackEase Amplitude="0.6" EasingMode="EaseOut"/></DoubleAnimation.EasingFunction></DoubleAnimation>
+                </Storyboard></BeginStoryboard></Trigger.EnterActions>
+                <Trigger.ExitActions><BeginStoryboard><Storyboard>
+                  <ColorAnimation Storyboard.TargetName="track" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#2E2D28" Duration="0:0:0.3"/>
+                  <ColorAnimation Storyboard.TargetName="knob" Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" To="#EDE8DF" Duration="0:0:0.3"/>
+                  <DoubleAnimation Storyboard.TargetName="knob" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" To="0" Duration="0:0:0.45"><DoubleAnimation.EasingFunction><BackEase Amplitude="0.6" EasingMode="EaseOut"/></DoubleAnimation.EasingFunction></DoubleAnimation>
+                </Storyboard></BeginStoryboard></Trigger.ExitActions>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </Window.Resources>
+
+  <Grid x:Name="Root" Background="#131311" RenderTransformOrigin="0.5,0.5" Opacity="0">
+    <Grid.RenderTransform><ScaleTransform ScaleX="0.97" ScaleY="0.97"/></Grid.RenderTransform>
+
+    <!-- Formas orgánicas que flotan muy despacio en el fondo -->
+    <Canvas IsHitTestVisible="False">
+      <Ellipse x:Name="Blob1" Width="520" Height="460" Canvas.Left="560" Canvas.Top="-180" Opacity="0.22">
+        <Ellipse.Fill><RadialGradientBrush><GradientStop Color="#A9C29B" Offset="0"/><GradientStop Color="#00A9C29B" Offset="1"/></RadialGradientBrush></Ellipse.Fill>
+        <Ellipse.Effect><BlurEffect Radius="90"/></Ellipse.Effect>
+        <Ellipse.RenderTransform><TranslateTransform/></Ellipse.RenderTransform>
+      </Ellipse>
+      <Ellipse x:Name="Blob2" Width="460" Height="420" Canvas.Left="-160" Canvas.Top="380" Opacity="0.16">
+        <Ellipse.Fill><RadialGradientBrush><GradientStop Color="#D8A27F" Offset="0"/><GradientStop Color="#00D8A27F" Offset="1"/></RadialGradientBrush></Ellipse.Fill>
+        <Ellipse.Effect><BlurEffect Radius="100"/></Ellipse.Effect>
+        <Ellipse.RenderTransform><TranslateTransform/></Ellipse.RenderTransform>
+      </Ellipse>
+      <Ellipse x:Name="Blob3" Width="340" Height="300" Canvas.Left="420" Canvas.Top="420" Opacity="0.10">
+        <Ellipse.Fill><RadialGradientBrush><GradientStop Color="#CDBB94" Offset="0"/><GradientStop Color="#00CDBB94" Offset="1"/></RadialGradientBrush></Ellipse.Fill>
+        <Ellipse.Effect><BlurEffect Radius="80"/></Ellipse.Effect>
+        <Ellipse.RenderTransform><TranslateTransform/></Ellipse.RenderTransform>
+      </Ellipse>
+    </Canvas>
+
+    <Grid>
+      <Grid.RowDefinitions><RowDefinition Height="64"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+
+      <!-- Barra superior -->
+      <Grid x:Name="TitleBar" Background="Transparent" Margin="40,0,24,0">
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+          <Path Data="M 7,0 C 12,0 15,4 14,8 C 13,13 8,15 4,13 C 0,11 -1,6 2,3 C 3,1 5,0 7,0 Z" Fill="#A9C29B" Margin="0,2,10,0"/>
+          <TextBlock Text="savia" FontSize="17" FontWeight="SemiBold" VerticalAlignment="Center"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+          <Button x:Name="BtnHistorial" Style="{StaticResource Ghost}" Content="historial" Margin="0,0,12,0"/>
+          <Button x:Name="BtnMin" Style="{StaticResource Dot}" Background="#5A574F" ToolTip="Minimizar"/>
+          <Button x:Name="BtnCerrar" Style="{StaticResource Dot}" Background="#D8A27F" ToolTip="Cerrar"/>
+        </StackPanel>
+      </Grid>
+
+      <Grid Grid.Row="1" x:Name="Vistas">
+
+        <!-- ============ VISTA 1: inicio ============ -->
+        <Grid x:Name="VistaInicio" Margin="64,12,64,44">
+          <Grid.RenderTransform><TranslateTransform/></Grid.RenderTransform>
+          <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+          <TextBlock FontSize="46" FontWeight="Light" LineHeight="54" TextWrapping="Wrap">
+            <Run Text="Hagamos que tu equipo"/><LineBreak/><Run Text="se sienta "/><Run Text="más ligero." Foreground="#A9C29B"/>
+          </TextBlock>
+          <TextBlock Grid.Row="1" Margin="0,14,0,0" FontSize="15" Foreground="{StaticResource Muted}" TextWrapping="Wrap" MaxWidth="560" HorizontalAlignment="Left"
+                     Text="Miro tu hardware y aplico solo lo que tiene sentido para él. Cada cambio queda explicado y se puede deshacer."/>
+          <WrapPanel x:Name="Chips" Grid.Row="2" Margin="0,26,0,0">
+            <Border CornerRadius="16" Background="#1A1A17" Padding="16,9">
+              <StackPanel Orientation="Horizontal">
+                <Ellipse x:Name="Pulso" Width="7" Height="7" Fill="#A9C29B" Margin="0,0,10,0"/>
+                <TextBlock Text="Leyendo tu equipo…" Foreground="{StaticResource Muted}" FontSize="13"/>
+              </StackPanel>
+            </Border>
+          </WrapPanel>
+          <StackPanel Grid.Row="3" VerticalAlignment="Center" Margin="0,8,0,0">
+            <TextBlock Text="¿Para qué lo vas a usar?" FontSize="14" Foreground="{StaticResource Muted}" Margin="0,0,0,14"/>
+            <UniformGrid x:Name="Tarjetas" Rows="1" Columns="4" Margin="0,0,-14,0"/>
+          </StackPanel>
+          <Grid Grid.Row="4">
+            <CheckBox x:Name="ChkSimular" Style="{StaticResource Toggle}" HorizontalAlignment="Left" VerticalAlignment="Center">
+              <StackPanel>
+                <TextBlock Text="Solo simular" FontSize="14"/>
+                <TextBlock Text="Te muestro qué haría sin tocar nada" FontSize="12" Foreground="{StaticResource Muted}"/>
+              </StackPanel>
+            </CheckBox>
+            <Button x:Name="BtnContinuar" Style="{StaticResource Pill}" HorizontalAlignment="Right" IsEnabled="False">
+              <StackPanel Orientation="Horizontal"><TextBlock Text="Continuar"/><TextBlock Text="  →"/></StackPanel>
+            </Button>
+          </Grid>
+        </Grid>
+
+        <!-- ============ VISTA 2: ajustes ============ -->
+        <Grid x:Name="VistaAjustes" Margin="64,4,64,44" Visibility="Collapsed">
+          <Grid.RenderTransform><TranslateTransform/></Grid.RenderTransform>
+          <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="56"/><ColumnDefinition Width="330"/></Grid.ColumnDefinitions>
+          <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+          <StackPanel Grid.ColumnSpan="3">
+            <Button x:Name="BtnVolver1" Style="{StaticResource Ghost}" Content="← volver" HorizontalAlignment="Left" Margin="-18,0,0,8"/>
+            <TextBlock FontSize="34" FontWeight="Light" Text="Lo que arranca contigo"/>
+            <TextBlock Margin="0,8,0,22" FontSize="14" Foreground="{StaticResource Muted}" TextWrapping="Wrap"
+                       Text="Estos programas se abren solos al encender el PC. Dejé marcados los que no aportan nada mientras juegas; tú decides."/>
+          </StackPanel>
+          <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden">
+            <ScrollViewer.OpacityMask>
+              <LinearGradientBrush StartPoint="0,0" EndPoint="0,1"><GradientStop Color="Black" Offset="0"/><GradientStop Color="Black" Offset="0.88"/><GradientStop Color="Transparent" Offset="1"/></LinearGradientBrush>
+            </ScrollViewer.OpacityMask>
+            <StackPanel x:Name="ListaInicio" Margin="0,0,0,40"/>
+          </ScrollViewer>
+          <StackPanel Grid.Row="1" Grid.Column="2">
+            <TextBlock Text="Opciones" FontSize="14" Foreground="{StaticResource Muted}" Margin="0,0,0,14"/>
+            <Border CornerRadius="22" Background="#1A1A17" Padding="22,6">
+              <StackPanel>
+                <CheckBox x:Name="ChkEfectos" Style="{StaticResource Toggle}" Margin="0,14">
+                  <StackPanel>
+                    <TextBlock Text="Quitar animaciones y transparencias" FontSize="14" TextWrapping="Wrap"/>
+                    <TextBlock x:Name="TxtEfectos" FontSize="12" Foreground="{StaticResource Muted}" TextWrapping="Wrap"/>
+                  </StackPanel>
+                </CheckBox>
+                <Rectangle Height="1" Fill="{StaticResource Line}"/>
+                <CheckBox x:Name="ChkLimpieza" Style="{StaticResource Toggle}" Margin="0,14" IsChecked="True">
+                  <StackPanel>
+                    <TextBlock Text="Borrar temporales viejos" FontSize="14"/>
+                    <TextBlock Text="Lo único que no se deshace (no hacen falta)" FontSize="12" Foreground="{StaticResource Muted}" TextWrapping="Wrap"/>
+                  </StackPanel>
+                </CheckBox>
+              </StackPanel>
+            </Border>
+            <TextBlock x:Name="TxtResumenPerfil" Margin="4,16,0,0" FontSize="13" Foreground="{StaticResource Muted}" TextWrapping="Wrap"/>
+            <TextBlock Text="Revisa esto" FontSize="14" Foreground="{StaticResource Muted}" Margin="0,24,0,10"/>
+            <StackPanel x:Name="PanelDiag"/>
+          </StackPanel>
+          <Button x:Name="BtnOptimizar" Grid.Row="2" Grid.Column="2" Style="{StaticResource Pill}" HorizontalAlignment="Right" Content="Optimizar ahora"/>
+        </Grid>
+
+        <!-- ============ VISTA 3: progreso ============ -->
+        <Grid x:Name="VistaProgreso" Margin="64,4,64,44" Visibility="Collapsed">
+          <Grid.RenderTransform><TranslateTransform/></Grid.RenderTransform>
+          <Grid.ColumnDefinitions><ColumnDefinition Width="360"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+          <StackPanel VerticalAlignment="Center">
+            <Grid Width="200" Height="200" HorizontalAlignment="Left">
+              <Ellipse Stroke="#22221E" StrokeThickness="5" Margin="16"/>
+              <Path x:Name="Arco" Stroke="#A9C29B" StrokeThickness="5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+              <TextBlock x:Name="TxtPorcentaje" Text="0" FontSize="44" FontWeight="Light" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Grid>
+            <TextBlock x:Name="TxtEstado" Margin="0,30,0,0" FontSize="30" FontWeight="Light" Text="Trabajando…" TextWrapping="Wrap"/>
+            <TextBlock x:Name="TxtSubEstado" Margin="0,8,0,0" FontSize="14" Foreground="{StaticResource Muted}" TextWrapping="Wrap" Text="Preparando el respaldo"/>
+            <WrapPanel x:Name="PanelMedicion" Margin="0,18,0,0"/>
+            <StackPanel x:Name="PanelFinal" Orientation="Horizontal" Margin="0,28,0,0" Opacity="0" IsHitTestVisible="False">
+              <Button x:Name="BtnReporte" Style="{StaticResource Pill}" Content="Ver reporte" Margin="0,0,10,0"/>
+              <Button x:Name="BtnVolver2" Style="{StaticResource Ghost}" Content="Volver al inicio"/>
+            </StackPanel>
+          </StackPanel>
+          <ScrollViewer x:Name="ScrollLog" Grid.Column="1" VerticalScrollBarVisibility="Hidden">
+            <ScrollViewer.OpacityMask>
+              <LinearGradientBrush StartPoint="0,0" EndPoint="0,1"><GradientStop Color="Transparent" Offset="0"/><GradientStop Color="Black" Offset="0.08"/><GradientStop Color="Black" Offset="0.9"/><GradientStop Color="Transparent" Offset="1"/></LinearGradientBrush>
+            </ScrollViewer.OpacityMask>
+            <StackPanel x:Name="Log" Margin="0,30,0,60"/>
+          </ScrollViewer>
+        </Grid>
+
+        <!-- ============ VISTA 4: historial ============ -->
+        <Grid x:Name="VistaHistorial" Margin="64,4,64,44" Visibility="Collapsed">
+          <Grid.RenderTransform><TranslateTransform/></Grid.RenderTransform>
+          <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+          <StackPanel>
+            <Button x:Name="BtnVolver3" Style="{StaticResource Ghost}" Content="← volver" HorizontalAlignment="Left" Margin="-18,0,0,8"/>
+            <TextBlock FontSize="34" FontWeight="Light" Text="Historial"/>
+            <TextBlock Margin="0,8,0,22" FontSize="14" Foreground="{StaticResource Muted}"
+                       Text="Cada optimización guarda un respaldo con los valores originales. Deshazla cuando quieras."/>
+          </StackPanel>
+          <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden">
+            <StackPanel x:Name="ListaHistorial"/>
+          </ScrollViewer>
+        </Grid>
+      </Grid>
+    </Grid>
+  </Grid>
+</Window>

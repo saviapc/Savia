@@ -1,0 +1,51 @@
+# Compila Savia.exe desde el código público y lo publica con su SHA-256
+# y una atestación de procedencia (prueba de que el .exe salió de este repositorio).
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compilar
+        shell: cmd
+        run: build.cmd
+
+      - name: SHA-256
+        shell: pwsh
+        run: |
+          $h = (Get-FileHash dist/Savia.exe -Algorithm SHA256).Hash.ToLower()
+          "$h  Savia.exe" | Set-Content dist/Savia.exe.sha256 -Encoding ascii
+          "SHA-256: $h" >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Atestación de procedencia
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/Savia.exe
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Savia
+          path: dist/*
+
+      - name: Publicar release
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $h = (Get-Content dist/Savia.exe.sha256).Split(' ')[0]
+          gh release create "${{ github.ref_name }}" dist/Savia.exe dist/Savia.exe.sha256 `
+            --title "Savia ${{ github.ref_name }}" `
+            --notes "SHA-256: ``$h``"
