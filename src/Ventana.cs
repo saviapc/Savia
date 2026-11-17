@@ -54,7 +54,7 @@ namespace Savia
             using (Stream st = Assembly.GetExecutingAssembly().GetManifestResourceStream("Savia.Ventana.xaml"))
                 Win = (Window)XamlReader.Load(st);
             foreach (string n in new[] { "Arco", "Blob1", "Blob2", "Blob3", "BtnCerrar", "BtnContinuar", "BtnHistorial", "BtnMin", "BtnOptimizar", "BtnReporte",
-                "BtnVolver1", "BtnVolver2", "BtnVolver3", "Chips", "ChkEfectos", "ChkLimpieza", "ChkPapelera", "ChkRam", "LineaPapelera", "LineaRam", "TxtRam", "ChkSimular", "ListaHistorial", "ListaInicio", "ListaApps", "Log", "PanelDiag",
+                "BtnVolver1", "BtnVolver2", "BtnVolver3", "Chips", "ChkEfectos", "ChkLimpieza", "ChkPapelera", "ChkRam", "LineaPapelera", "LineaRam", "TxtRam", "ChkSimular", "ListaHistorial", "ListaInicio", "ListaApps", "Log", "PanelDiag", "PanelTrasReinicio", "TxtTrasReinicio", "ChipsTrasReinicio", "BtnReiniciar",
                 "PanelFinal", "PanelMedicion", "Pulso", "Root", "ScrollLog", "Tarjetas", "TitleBar", "TxtEfectos", "TxtEstado", "TxtPorcentaje", "TxtResumenPerfil",
                 "TxtSubEstado", "VistaAjustes", "VistaHistorial", "VistaInicio", "VistaProgreso" })
                 ui[n] = Win.FindName(n);
@@ -79,6 +79,14 @@ namespace Savia
             E<Button>("BtnContinuar").Click += (o, e) => MostrarAjustes();
             E<Button>("BtnVolver1").Click += (o, e) => MostrarVista(E<FrameworkElement>("VistaInicio"));
             E<Button>("BtnVolver2").Click += (o, e) => MostrarVista(E<FrameworkElement>("VistaInicio"));
+            E<Button>("BtnReiniciar").Click += (o, e) =>
+            {
+                // Primer clic pide confirmación en el propio botón; el segundo reinicia en 5 segundos.
+                var b = E<Button>("BtnReiniciar");
+                if ((string)b.Content != "¿seguro? pulsa otra vez") { b.Content = "¿seguro? pulsa otra vez"; return; }
+                b.Content = "reiniciando…"; b.IsEnabled = false;
+                Process.Start(new ProcessStartInfo("shutdown.exe", "/r /t 5 /c \"Savia: reiniciando para terminar la optimización\"") { UseShellExecute = false, CreateNoWindow = true });
+            };
             E<Button>("BtnVolver3").Click += (o, e) => MostrarVista(E<FrameworkElement>("VistaInicio"));
             E<Button>("BtnOptimizar").Click += (o, e) => Optimizar();
             E<Button>("BtnReporte").Click += (o, e) => { if (reporteFinal != null) AbrirReporte(reporteFinal); };
@@ -274,6 +282,7 @@ namespace Savia
                 await Task.Run(() => { h = Hardware.Detectar(); progs = Motor.ProgramasInicio().Where(p => p.Activo).ToList(); dg = Diagnostico.Revisar(h); ap = Apps.Detectar(); });
                 hw = h; inicio = progs; diag = dg; apps = ap;
                 MostrarHardware();
+                ComprobarMedicionPendiente();
             }
             catch (Exception ex) { Error(ex); }
         }
@@ -391,8 +400,6 @@ namespace Savia
                         try { extras.Add(Memoria.LiberarCache()); } catch (Exception ex) { extras.Add(ex.Message); }
                     }
                     if (extras.Count > 0) limpieza = string.Join(" ", extras);
-                    PasoAsync("Midiendo de nuevo");
-                    despues = Medicion.Tomar();
                     reporte = System.IO.Path.Combine(Motor.DirReportes, (sim ? "simulacion_" : "reporte_") + sello + ".html");
                     Reporte.Generar(s, res, punto, limpieza, despues, diag, reporte);
                 });
@@ -417,6 +424,54 @@ namespace Savia
             }
             Process.Start("explorer.exe", "/select,\"" + ruta + "\"");
         }
+        /// <summary>
+        /// La comparación real se hace tras reiniciar: al abrir Savia, si la última optimización tiene
+        /// medición de "antes" y el PC ya se reinició, mide sola (cuando los programas de inicio ya cargaron).
+        /// </summary>
+        async void ComprobarMedicionPendiente()
+        {
+            try
+            {
+                string arch = Directory.GetFiles(Motor.DirRespaldos, "respaldo_*.json").OrderByDescending(f => f).FirstOrDefault();
+                if (arch == null) return;
+                var d = Motor.LeerRespaldo(arch);
+                if ((d.ContainsKey("Revertido") && d["Revertido"] != null) || !d.ContainsKey("MedicionAntes") || d["MedicionAntes"] == null) return;
+                var antes = Medicion.DesdeDiccionario(d["MedicionAntes"]);
+                var claves = new[] { "Procesos", "Servicios", "RAMUsadaGB", "Inicio" };
+                var panel = E<FrameworkElement>("PanelTrasReinicio");
+                var txt = E<TextBlock>("TxtTrasReinicio");
+                DateTime arranque = Motor.UltimoArranque(), fechaOpt = DateTime.Parse(Convert.ToString(d["Fecha"]));
+
+                if (arranque < fechaOpt)
+                {
+                    txt.Text = "Reinicia el PC para terminar tu última optimización. Al volver a abrir Savia verás cuánto mejoró.";
+                    panel.Visibility = Visibility.Visible; Entrada(panel, 400, 10);
+                    return;
+                }
+                bool yaMedido = d.ContainsKey("MedicionDespues") && d["MedicionDespues"] != null &&
+                                d.ContainsKey("MedicionDespuesTrasReinicio") && Convert.ToBoolean(d["MedicionDespuesTrasReinicio"]);
+                panel.Visibility = Visibility.Visible; Entrada(panel, 400, 10);
+                if (yaMedido)
+                {
+                    txt.Text = "Desde tu última optimización (medido tras reiniciar):";
+                    MostrarComparacion(E<Panel>("ChipsTrasReinicio"), antes, Medicion.DesdeDiccionario(d["MedicionDespues"]), null, claves);
+                    return;
+                }
+                // Esperar a que terminen de cargar los programas de inicio (2 minutos tras encender).
+                TimeSpan espera = TimeSpan.FromMinutes(2) - (DateTime.Now - arranque);
+                txt.Text = espera > TimeSpan.Zero ? "Esperando a que Windows termine de arrancar para medir la mejora…" : "Midiendo cuánto mejoró tu PC…";
+                Medicion m = null;
+                await Task.Run(() => { if (espera > TimeSpan.Zero) System.Threading.Thread.Sleep(espera); m = Medicion.Tomar(); });
+                d = Motor.LeerRespaldo(arch);
+                d["MedicionDespues"] = m.ADiccionario();
+                d["MedicionDespuesTrasReinicio"] = true;
+                Motor.EscribirRespaldo(arch, d);
+                txt.Text = "Desde tu última optimización (medido tras reiniciar):";
+                MostrarComparacion(E<Panel>("ChipsTrasReinicio"), antes, m, null, claves);
+            }
+            catch (Exception ex) { Programa.Registrar(ex); }
+        }
+
         void Paso(string t) { E<TextBlock>("TxtSubEstado").Text = t; }
         void PasoAsync(string t) { Win.Dispatcher.BeginInvoke(new Action(() => Paso(t))); }
 
@@ -431,9 +486,11 @@ namespace Savia
             var partes = new List<string> { hechosN + (s.Simular ? " cambios por aplicar" : " cambios aplicados"), bien + " ya estaban bien" };
             if (err > 0) partes.Add(err + " no se pudieron aplicar");
             string sub = string.Join(" · ", partes);
-            if (s.RequiereReinicio && !s.Simular) sub += ". Reinicia el PC para terminar.";
+            if (!s.Simular) sub += ". Reinicia el PC y vuelve a abrir Savia: mediré solo cuánto mejoró.";
+            E<UIElement>("BtnReiniciar").Visibility = s.Simular ? Visibility.Collapsed : Visibility.Visible;
+            E<Button>("BtnReiniciar").Content = "Reiniciar ahora";
             Paso(sub);
-            MostrarComparacion(E<Panel>("PanelMedicion"), s.MedicionAntes, despues, null, new[] { "Procesos", "Servicios", "RAMUsadaGB" });
+
             var pf = E<FrameworkElement>("PanelFinal");
             pf.IsHitTestVisible = true;
             Entrada(pf, 250, 12);
@@ -512,6 +569,7 @@ namespace Savia
                             // Se guarda en el respaldo para verla la próxima vez que abras el historial.
                             var json = Motor.LeerRespaldo(arch);
                             json["MedicionDespues"] = m.ADiccionario();
+                            json["MedicionDespuesTrasReinicio"] = Motor.UltimoArranque() > DateTime.Parse(Convert.ToString(json["Fecha"]));
                             Motor.EscribirRespaldo(arch, json);
                         }
                         catch (Exception ex) { Error(ex); }

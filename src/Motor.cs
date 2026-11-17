@@ -471,6 +471,12 @@ namespace Savia
         }
 
         // ------------------------------------------------------------ Utilidades
+        public static DateTime UltimoArranque()
+        {
+            var os = Wmi.Consultar("SELECT LastBootUpTime FROM Win32_OperatingSystem").FirstOrDefault();
+            return os == null ? DateTime.MinValue : ManagementDateTimeConverter.ToDateTime(Convert.ToString(os["LastBootUpTime"]));
+        }
+
         public static int Ejecutar(string exe, string args, out string salida)
         {
             var psi = new ProcessStartInfo(exe, args) { UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true, CreateNoWindow = true };

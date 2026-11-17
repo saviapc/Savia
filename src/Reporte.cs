@@ -41,18 +41,29 @@ namespace Savia
                 sb.Append("<li>").Append(H(l)).Append("</li>");
             sb.Append("</ul>");
 
-            if (s.MedicionAntes != null)
+            if (s.MedicionAntes != null && despues == null)
+            {
+                // Medir justo al terminar engaña (Windows sigue procesando los cambios): la comparación se hace tras reiniciar.
+                sb.Append("<h2>Cómo estaba tu PC antes</h2><table><tr><th>Medida</th><th>Antes</th></tr>");
+                foreach (var e in Medicion.Etiquetas)
+                {
+                    double? a = s.MedicionAntes.Valor(e[0]);
+                    sb.AppendFormat("<tr><td>{0}</td><td>{1}</td></tr>", H(e[1]), a.HasValue ? a + e[2] : "-");
+                }
+                sb.Append("</table><p class=\"sub\">").Append(s.Simular
+                    ? "En simulación no se cambia nada."
+                    : "Reinicia el PC y vuelve a abrir Savia: medirá solo y te mostrará cuánto mejoró. También puedes hacerlo desde el historial con \"medir ahora\".").Append("</p>");
+            }
+            else if (s.MedicionAntes != null)
             {
                 sb.Append("<h2>Antes y después</h2><table><tr><th>Medida</th><th>Antes</th><th>Después</th></tr>");
                 foreach (var e in Medicion.Etiquetas)
                 {
-                    double? a = s.MedicionAntes.Valor(e[0]), d = despues == null ? null : despues.Valor(e[0]);
+                    double? a = s.MedicionAntes.Valor(e[0]), d = despues.Valor(e[0]);
                     sb.AppendFormat("<tr><td>{0}</td><td>{1}</td><td class=\"{2}\">{3}</td></tr>", H(e[1]),
                         a.HasValue ? a + e[2] : "-", a.HasValue && d.HasValue && d < a ? "ok" : "", d.HasValue ? d + e[2] : "-");
                 }
-                sb.Append("</table><p class=\"sub\">").Append(s.Simular
-                    ? "En simulación no se cambia nada, así que ambas mediciones deberían parecerse."
-                    : "La medición de \"después\" se toma al terminar, sin reiniciar. Tras reiniciar, usa \"medir ahora\" en el historial de Savia para ver la diferencia completa.").Append("</p>");
+                sb.Append("</table>");
             }
 
             if (diag != null && diag.Count > 0)

@@ -248,7 +248,8 @@
           </TextBlock>
           <TextBlock Grid.Row="1" Margin="0,14,0,0" FontSize="15" Foreground="{StaticResource Muted}" TextWrapping="Wrap" MaxWidth="560" HorizontalAlignment="Left"
                      Text="Miro tu hardware y aplico solo lo que tiene sentido para él. Cada cambio queda explicado y se puede deshacer."/>
-          <WrapPanel x:Name="Chips" Grid.Row="2" Margin="0,26,0,0">
+          <StackPanel Grid.Row="2" Margin="0,26,0,0">
+          <WrapPanel x:Name="Chips">
             <Border CornerRadius="16" Background="#1A1A17" Padding="16,9">
               <StackPanel Orientation="Horizontal">
                 <Ellipse x:Name="Pulso" Width="7" Height="7" Fill="#A9C29B" Margin="0,0,10,0"/>
@@ -256,6 +257,11 @@
               </StackPanel>
             </Border>
           </WrapPanel>
+          <StackPanel x:Name="PanelTrasReinicio" Margin="0,4,0,0" Visibility="Collapsed">
+            <TextBlock x:Name="TxtTrasReinicio" FontSize="13" Foreground="#A9C29B" Margin="2,0,0,10" TextWrapping="Wrap"/>
+            <WrapPanel x:Name="ChipsTrasReinicio"/>
+          </StackPanel>
+          </StackPanel>
           <StackPanel Grid.Row="3" VerticalAlignment="Center" Margin="0,8,0,0">
             <TextBlock Text="¿Para qué lo vas a usar?" FontSize="14" Foreground="{StaticResource Muted}" Margin="0,0,0,14"/>
             <UniformGrid x:Name="Tarjetas" Rows="1" Columns="4" Margin="0,0,-14,0"/>
@@ -353,6 +359,7 @@
             <WrapPanel x:Name="PanelMedicion" Margin="0,18,0,0"/>
             <StackPanel x:Name="PanelFinal" Orientation="Horizontal" Margin="0,28,0,0" Opacity="0" IsHitTestVisible="False">
               <Button x:Name="BtnReporte" Style="{StaticResource Pill}" Content="Ver reporte" Margin="0,0,10,0"/>
+              <Button x:Name="BtnReiniciar" Style="{StaticResource Ghost}" Content="Reiniciar ahora" Margin="0,0,4,0"/>
               <Button x:Name="BtnVolver2" Style="{StaticResource Ghost}" Content="Volver al inicio"/>
             </StackPanel>
           </StackPanel>
