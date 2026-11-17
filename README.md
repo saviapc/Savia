@@ -42,7 +42,7 @@ Solo se firman los ejecutables compilados por GitHub Actions desde este reposito
 
 ## Privacidad
 
-Este programa no transfiere información a otros sistemas de la red, salvo que lo pida expresamente el usuario o la persona que lo instala o lo usa. La única conexión que hace es un ping a `1.1.1.1` al medir el PC, para calcular la latencia. Los respaldos y reportes se guardan solo en `C:\ProgramData\Savia`.
+Este programa no transfiere información a otros sistemas de la red, salvo que lo pida expresamente el usuario o la persona que lo instala o lo usa. Solo hace dos conexiones: un ping a `1.1.1.1` al medir el PC, para calcular la latencia, y una consulta a la API pública de GitHub al abrirse, para saber si hay una versión nueva (solo lee el número de versión; no envía datos tuyos ni descarga nada). Los respaldos y reportes se guardan solo en `C:\ProgramData\Savia`.
 
 ## Licencia
 

@@ -54,7 +54,7 @@ namespace Savia
             using (Stream st = Assembly.GetExecutingAssembly().GetManifestResourceStream("Savia.Ventana.xaml"))
                 Win = (Window)XamlReader.Load(st);
             foreach (string n in new[] { "Arco", "Blob1", "Blob2", "Blob3", "BtnCerrar", "BtnContinuar", "BtnHistorial", "BtnMin", "BtnOptimizar", "BtnReporte",
-                "BtnVolver1", "BtnVolver2", "BtnVolver3", "Chips", "ChkEfectos", "ChkLimpieza", "ChkPapelera", "ChkRam", "LineaPapelera", "LineaRam", "TxtRam", "ChkSimular", "ListaHistorial", "ListaInicio", "ListaApps", "Log", "PanelDiag", "PanelTrasReinicio", "TxtTrasReinicio", "ChipsTrasReinicio", "BtnReiniciar",
+                "BtnVolver1", "BtnVolver2", "BtnVolver3", "Chips", "ChkEfectos", "ChkLimpieza", "ChkPapelera", "ChkRam", "LineaPapelera", "LineaRam", "TxtRam", "ChkSimular", "ListaHistorial", "ListaInicio", "ListaApps", "Log", "PanelDiag", "PanelTrasReinicio", "TxtTrasReinicio", "ChipsTrasReinicio", "BtnReiniciar", "BtnActualizar", "TxtActualizar",
                 "PanelFinal", "PanelMedicion", "Pulso", "Root", "ScrollLog", "Tarjetas", "TitleBar", "TxtEfectos", "TxtEstado", "TxtPorcentaje", "TxtResumenPerfil",
                 "TxtSubEstado", "VistaAjustes", "VistaHistorial", "VistaInicio", "VistaProgreso" })
                 ui[n] = Win.FindName(n);
@@ -283,6 +283,7 @@ namespace Savia
                 hw = h; inicio = progs; diag = dg; apps = ap;
                 MostrarHardware();
                 ComprobarMedicionPendiente();
+                ComprobarActualizacion();
             }
             catch (Exception ex) { Error(ex); }
         }
@@ -470,6 +471,19 @@ namespace Savia
                 MostrarComparacion(E<Panel>("ChipsTrasReinicio"), antes, m, null, claves);
             }
             catch (Exception ex) { Programa.Registrar(ex); }
+        }
+
+        /// <summary>Si hay una versión nueva en GitHub, muestra un aviso discreto en la barra superior.</summary>
+        async void ComprobarActualizacion()
+        {
+            VersionNueva v = null;
+            await Task.Run(() => v = Actualizaciones.Comprobar(Actualizaciones.Actual));
+            if (v == null) return;
+            E<TextBlock>("TxtActualizar").Text = "versión " + v.Numero + " disponible";
+            var b = E<Button>("BtnActualizar");
+            b.Click += (o, e) => AbrirReporte(v.Url);
+            b.Visibility = Visibility.Visible;
+            Entrada(b, 0, 8);
         }
 
         void Paso(string t) { E<TextBlock>("TxtSubEstado").Text = t; }
