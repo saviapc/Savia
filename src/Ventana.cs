@@ -81,7 +81,7 @@ namespace Savia
             E<Button>("BtnVolver2").Click += (o, e) => MostrarVista(E<FrameworkElement>("VistaInicio"));
             E<Button>("BtnVolver3").Click += (o, e) => MostrarVista(E<FrameworkElement>("VistaInicio"));
             E<Button>("BtnOptimizar").Click += (o, e) => Optimizar();
-            E<Button>("BtnReporte").Click += (o, e) => { if (reporteFinal != null) Process.Start(reporteFinal); };
+            E<Button>("BtnReporte").Click += (o, e) => { if (reporteFinal != null) AbrirReporte(reporteFinal); };
 
             timer.Tick += (o, e) =>
             {
@@ -401,6 +401,22 @@ namespace Savia
             catch (Exception ex) { Error(ex); }
         }
 
+        /// <summary>
+        /// Abre el reporte con el navegador predeterminado. Si Windows no tiene uno válido
+        /// (por ejemplo, tras desinstalar el navegador que lo era), usa Edge y, si no, muestra el archivo.
+        /// </summary>
+        static void AbrirReporte(string ruta)
+        {
+            try { Process.Start(ruta); return; } catch (System.ComponentModel.Win32Exception) { }
+            string edge = null;
+            using (var k = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\msedge.exe"))
+                if (k != null) edge = k.GetValue(null) as string;
+            if (edge != null && File.Exists(edge))
+            {
+                try { Process.Start(edge, "\"" + ruta + "\""); return; } catch { }
+            }
+            Process.Start("explorer.exe", "/select,\"" + ruta + "\"");
+        }
         void Paso(string t) { E<TextBlock>("TxtSubEstado").Text = t; }
         void PasoAsync(string t) { Win.Dispatcher.BeginInvoke(new Action(() => Paso(t))); }
 
