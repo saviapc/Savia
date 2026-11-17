@@ -9,6 +9,20 @@ if not exist "%CSC%" (
     exit /b 1
 )
 if not exist "%~dp0dist" mkdir "%~dp0dist"
+if not exist "%~dp0obj" mkdir "%~dp0obj"
+:: La versión sale del archivo VERSION: la misma en todas las compilaciones.
+set /p VER=<"%~dp0VERSION"
+(
+echo using System.Reflection;
+echo [assembly: AssemblyTitle("Savia"^)]
+echo [assembly: AssemblyProduct("Savia"^)]
+echo [assembly: AssemblyDescription("Optimiza Windows para jugar de forma segura y reversible."^)]
+echo [assembly: AssemblyCompany("saviapc"^)]
+echo [assembly: AssemblyCopyright("Licencia MIT"^)]
+echo [assembly: AssemblyVersion("%VER%.0"^)]
+echo [assembly: AssemblyFileVersion("%VER%.0"^)]
+echo [assembly: AssemblyInformationalVersion("%VER%"^)]
+) > "%~dp0obj\Version.cs"
 "%CSC%" /nologo /target:winexe /platform:anycpu /optimize+ /utf8output ^
  /out:"%~dp0dist\Savia.exe" ^
  /win32manifest:"%~dp0src\app.manifest" /win32icon:"%~dp0src\icono.ico" ^
@@ -17,7 +31,7 @@ if not exist "%~dp0dist" mkdir "%~dp0dist"
  /r:"%WPF%\PresentationFramework.dll" /r:"%WPF%\PresentationCore.dll" /r:"%WPF%\WindowsBase.dll" ^
  /r:"%NET%\System.Xaml.dll" /r:System.Management.dll /r:System.ServiceProcess.dll ^
  /r:System.Web.Extensions.dll /r:Microsoft.CSharp.dll /r:System.Core.dll ^
- "%~dp0src\*.cs"
+ "%~dp0src\*.cs" "%~dp0obj\Version.cs"
 if errorlevel 1 exit /b 1
 echo.
 echo Listo: dist\Savia.exe

@@ -31,6 +31,19 @@ build.cmd
 
 Usa el compilador de C# incluido en Windows (.NET Framework 4.8). El resultado queda en `dist\Savia.exe`.
 
+## Code signing policy
+
+Free code signing provided by [SignPath.io](https://signpath.io), certificate by [SignPath Foundation](https://signpath.org).
+
+- Autores y revisores: [miembros de saviapc](https://github.com/orgs/saviapc/people)
+- Aprobadores de cada versión firmada: [propietarios de saviapc](https://github.com/orgs/saviapc/people?query=role%3Aowner)
+
+Solo se firman los ejecutables compilados por GitHub Actions desde este repositorio, y cada versión se aprueba a mano antes de firmarse.
+
+## Privacidad
+
+Este programa no transfiere información a otros sistemas de la red, salvo que lo pida expresamente el usuario o la persona que lo instala o lo usa. La única conexión que hace es un ping a `1.1.1.1` al medir el PC, para calcular la latencia. Los respaldos y reportes se guardan solo en `C:\ProgramData\Savia`.
+
 ## Licencia
 
 MIT

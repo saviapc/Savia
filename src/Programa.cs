@@ -6,13 +6,6 @@ using System.Security.Principal;
 using System.Threading;
 using System.Windows;
 
-[assembly: AssemblyTitle("Savia")]
-[assembly: AssemblyProduct("Savia")]
-[assembly: AssemblyDescription("Optimiza Windows para jugar de forma segura y reversible.")]
-[assembly: AssemblyCopyright("Licencia MIT")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
-
 namespace Savia
 {
     public static class Programa
