@@ -71,6 +71,30 @@ namespace Savia
                     R(s, @"HKCU\Control Panel\Mouse", "MouseThreshold1", "0", RegistryValueKind.String);
                     R(s, @"HKCU\Control Panel\Mouse", "MouseThreshold2", "0", RegistryValueKind.String); } },
 
+            // ===================================================== INPUT LAG
+            new Ajuste { Id = "usb-despierto", Categoria = "Input lag", Nombre = "Que los puertos USB no se duerman", Perfiles = new[] { "Competitivo", "Streaming" },
+                Porque = "Windows pone a dormir los puertos USB que cree inactivos. Al despertar, el ratón, el teclado o los cascos pueden tardar unos milisegundos o desconectarse un instante. Se desactiva solo con el PC enchufado.",
+                Aplicar = s => Energia.Aplicar(s, Energia.SubUsb, Energia.UsbSuspension, 0, "suspensión selectiva de USB") },
+
+            new Ajuste { Id = "pcie-despierto", Categoria = "Input lag", Nombre = "Sin ahorro de energía en la tarjeta gráfica y el SSD (PCI Express)", Perfiles = new[] { "Competitivo" },
+                Porque = "El ahorro de energía del bus PCI Express adormece la gráfica, el SSD NVMe y la tarjeta de red entre fotograma y fotograma, lo que añade pequeñas esperas. Se desactiva solo con el PC enchufado.",
+                Aplicar = s => Energia.Aplicar(s, Energia.SubPcie, Energia.PcieAhorro, 0, "ahorro de energía de PCI Express") },
+
+            new Ajuste { Id = "power-throttling", Categoria = "Input lag", Nombre = "Sin limitar la CPU de los programas en segundo plano", Perfiles = new[] { "Competitivo", "Calidad", "Streaming" },
+                Porque = "Windows frena los programas que considera de fondo para ahorrar energía, y a veces frena el juego o su antitrampas. En un PC de escritorio no compensa.",
+                Condicion = s => !s.Hw.Portatil, SiNoAplica = "En un portátil se mantiene para cuidar la batería y la temperatura.",
+                Aplicar = s => R(s, @"HKLM\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling", "PowerThrottlingOff", 1) },
+
+            new Ajuste { Id = "juegos-ventana", Categoria = "Input lag", Nombre = "Optimizaciones para juegos en ventana", Perfiles = new[] { "Competitivo", "Calidad", "Streaming" },
+                Porque = "Los juegos en ventana o en pantalla completa sin bordes pasan a usar la forma moderna de mostrar imágenes de Windows 11: menos retraso entre tu clic y la pantalla, y compatibilidad con G-Sync/FreeSync.",
+                Condicion = s => s.Hw.Build >= 22000, SiNoAplica = "Solo existe en Windows 11.",
+                Aplicar = s => {
+                    const string ruta = @"HKCU\Software\Microsoft\DirectX\UserGpuPreferences", nombre = "DirectXUserGlobalSettings";
+                    object v; RegistryValueKind k;
+                    string actual = Motor.LeerValor(ruta, nombre, out v, out k) ? Convert.ToString(v) : "";
+                    if (actual.Contains("SwapEffectUpgradeEnable=1")) return;
+                    string nuevo = Regex.Replace(actual, @"SwapEffectUpgradeEnable=\d;?", "") + "SwapEffectUpgradeEnable=1;";
+                    R(s, ruta, nombre, nuevo, RegistryValueKind.String); } },
             // ===================================================== RED
             new Ajuste { Id = "red-throttling", Categoria = "Red", Nombre = "Quitar el límite de red multimedia", Perfiles = new[] { "Competitivo", "Streaming" },
                 Porque = "Windows limita el tráfico de red mientras se reproduce audio o vídeo; quitar ese límite evita pequeños picos de ping.",

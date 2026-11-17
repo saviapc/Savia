@@ -348,6 +348,7 @@ namespace Savia
                 case "PlanEnergia": return string.Format("plan {0} -> {1}", c["Anterior"], c["Nuevo"]);
                 case "Pantalla": return string.Format("pantalla {0} Hz -> {1} Hz", c["Anterior"], c["Nuevo"]);
                 case "App": return string.Format("app {0} quitada", c["Nombre"]);
+                case "Energia": return string.Format("{0}: {1} -> {2}", c["Nombre"], c["Anterior"], c["Nuevo"]);
             }
             return "";
         }
@@ -452,6 +453,7 @@ namespace Savia
                             if (c["Anterior"] != null) { string o; Ejecutar("powercfg.exe", "/setactive " + c["Anterior"], out o); }
                             break;
                         case "App": Apps.Recuperar((string)c["Familia"]); break;
+                        case "Energia": Energia.Poner((string)c["Plan"], (string)c["Sub"], (string)c["Ajuste"], Convert.ToInt32(c["Anterior"])); break;
                         case "Pantalla":
                         {
                             int r2 = Pantalla.Poner(Convert.ToInt32(c["Anterior"]));
@@ -466,32 +468,6 @@ namespace Savia
             d["Revertido"] = DateTime.Now.ToString("s");
             EscribirRespaldo(archivo, d);
             return fallos.ToArray();
-        }
-
-        // ------------------------------------------------------------ Limpieza (no reversible)
-        public static string Limpiar()
-        {
-            long total = 0; int n = 0;
-            DateTime limite = DateTime.Now.AddDays(-2);
-            var dirs = new[] { Path.GetTempPath(), Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Temp") }.Distinct(StringComparer.OrdinalIgnoreCase);
-            foreach (string dir in dirs)
-            {
-                if (!Directory.Exists(dir)) continue;
-                IEnumerable<string> archivos;
-                try { archivos = Directory.EnumerateFiles(dir, "*", SearchOption.AllDirectories).ToList(); } catch { archivos = Directory.EnumerateFiles(dir).ToList(); }
-                foreach (string f in archivos)
-                {
-                    try
-                    {
-                        var fi = new FileInfo(f);
-                        if (fi.LastWriteTime >= limite) continue;
-                        long tam = fi.Length;
-                        fi.Delete(); total += tam; n++;
-                    }
-                    catch { }   // en uso: se deja
-                }
-            }
-            return string.Format("Se borraron {0} archivos temporales con más de 2 días ({1} MB liberados).", n, total / (1024 * 1024));
         }
 
         // ------------------------------------------------------------ Utilidades

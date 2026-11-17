@@ -77,7 +77,7 @@ namespace Savia
             }
             sb.Append("</table>");
 
-            if (limpieza != null) sb.Append("<h2>Limpieza de temporales</h2><p>").Append(H(limpieza)).Append(" <i>(los temporales borrados no se recuperan; no son necesarios)</i></p>");
+            if (limpieza != null) sb.Append("<h2>Limpieza y memoria</h2><p>").Append(H(limpieza)).Append(" <i>(lo borrado no se recupera; no era necesario)</i></p>");
             if (!s.Simular)
                 sb.Append("<h2>¿Quieres deshacerlo?</h2><p>Todo lo marcado como <i>Aplicado</i> se puede deshacer desde <b>historial</b> en Savia. Respaldo de esta sesión:<br><code>")
                   .Append(H(s.ArchivoRespaldo)).Append("</code></p><p>Punto de restauración de Windows: ").Append(H(punto)).Append("</p>");

@@ -54,7 +54,7 @@ namespace Savia
             using (Stream st = Assembly.GetExecutingAssembly().GetManifestResourceStream("Savia.Ventana.xaml"))
                 Win = (Window)XamlReader.Load(st);
             foreach (string n in new[] { "Arco", "Blob1", "Blob2", "Blob3", "BtnCerrar", "BtnContinuar", "BtnHistorial", "BtnMin", "BtnOptimizar", "BtnReporte",
-                "BtnVolver1", "BtnVolver2", "BtnVolver3", "Chips", "ChkEfectos", "ChkLimpieza", "ChkSimular", "ListaHistorial", "ListaInicio", "ListaApps", "Log", "PanelDiag",
+                "BtnVolver1", "BtnVolver2", "BtnVolver3", "Chips", "ChkEfectos", "ChkLimpieza", "ChkPapelera", "ChkRam", "LineaPapelera", "LineaRam", "TxtRam", "ChkSimular", "ListaHistorial", "ListaInicio", "ListaApps", "Log", "PanelDiag",
                 "PanelFinal", "PanelMedicion", "Pulso", "Root", "ScrollLog", "Tarjetas", "TitleBar", "TxtEfectos", "TxtEstado", "TxtPorcentaje", "TxtResumenPerfil",
                 "TxtSubEstado", "VistaAjustes", "VistaHistorial", "VistaInicio", "VistaProgreso" })
                 ui[n] = Win.FindName(n);
@@ -310,7 +310,12 @@ namespace Savia
             else { ef.IsChecked = false; ef.IsEnabled = true; E<TextBlock>("TxtEfectos").Text = "Tu equipo va sobrado: casi no cuestan FPS. Opcional."; }
 
             bool sim = E<CheckBox>("ChkSimular").IsChecked == true;
-            E<UIElement>("ChkLimpieza").Visibility = sim ? Visibility.Collapsed : Visibility.Visible;
+            foreach (string n in new[] { "ChkLimpieza", "ChkPapelera", "ChkRam", "LineaPapelera", "LineaRam" })
+                E<UIElement>(n).Visibility = sim ? Visibility.Collapsed : Visibility.Visible;
+            E<CheckBox>("ChkRam").IsChecked = hw.RAMGB <= 16;
+            E<TextBlock>("TxtRam").Text = hw.RAMGB <= 16
+                ? "Recomendado con " + hw.RAMGB + " GB: vacía la caché de memoria para que el juego tenga más libre al empezar."
+                : "Con " + hw.RAMGB + " GB casi no se nota. Windows vuelve a llenar la caché con el uso.";
             E<Button>("BtnOptimizar").Content = sim ? "Simular" : "Optimizar ahora";
             E<TextBlock>("TxtResumenPerfil").Text = "Perfil " + Titulos[perfilElegido].ToLower(Es) + ". " +
                 (sim ? "Modo simulación: no se toca nada." : "Antes de cambiar nada creo un punto de restauración y guardo cada valor original.");
@@ -336,6 +341,8 @@ namespace Savia
             var appsElegidas = E<Panel>("ListaApps").Children.OfType<Border>().Select(b => b.Child as CheckBox)
                 .Where(c => c != null && c.IsChecked == true).Select(c => (AppPreinstalada)c.Tag).ToList();
             bool limpiar = E<CheckBox>("ChkLimpieza").IsChecked == true && !sim;
+            bool papelera = E<CheckBox>("ChkPapelera").IsChecked == true && !sim;
+            bool liberarRam = E<CheckBox>("ChkRam").IsChecked == true && !sim;
             var s = new Sesion { Simular = sim, Perfil = perfilElegido, Hw = hw, QuitarEfectos = E<CheckBox>("ChkEfectos").IsChecked == true };
 
             E<Panel>("Log").Children.Clear();
@@ -376,7 +383,14 @@ namespace Savia
                     res.AddRange(Motor.DesactivarInicio(s, elegidos, avance));
                     if (appsElegidas.Count > 0) { PasoAsync("Quitando apps preinstaladas"); res.AddRange(Apps.Quitar(s, appsElegidas, avance)); }
                     Motor.GuardarRespaldo(s);
-                    if (limpiar) { PasoAsync("Limpiando archivos temporales"); limpieza = Motor.Limpiar(); }
+                    var extras = new List<string>();
+                    if (limpiar || papelera) { PasoAsync("Borrando basura acumulada"); extras.Add(Limpieza.Limpiar(papelera)); }
+                    if (liberarRam)
+                    {
+                        PasoAsync("Liberando memoria en caché");
+                        try { extras.Add(Memoria.LiberarCache()); } catch (Exception ex) { extras.Add(ex.Message); }
+                    }
+                    if (extras.Count > 0) limpieza = string.Join(" ", extras);
                     PasoAsync("Midiendo de nuevo");
                     despues = Medicion.Tomar();
                     reporte = System.IO.Path.Combine(Motor.DirReportes, (sim ? "simulacion_" : "reporte_") + sello + ".html");

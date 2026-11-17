@@ -296,7 +296,8 @@
               <StackPanel x:Name="ListaApps"/>
             </StackPanel>
           </ScrollViewer>
-          <StackPanel Grid.Row="1" Grid.Column="2">
+          <ScrollViewer Grid.Row="1" Grid.Column="2" VerticalScrollBarVisibility="Hidden">
+          <StackPanel Margin="0,0,0,30">
             <TextBlock Text="Opciones" FontSize="14" Foreground="{StaticResource Muted}" Margin="0,0,0,14"/>
             <Border CornerRadius="22" Background="#1A1A17" Padding="22,6">
               <StackPanel>
@@ -309,8 +310,22 @@
                 <Rectangle Height="1" Fill="{StaticResource Line}"/>
                 <CheckBox x:Name="ChkLimpieza" Style="{StaticResource Toggle}" Margin="0,14" IsChecked="True">
                   <StackPanel>
-                    <TextBlock Text="Borrar temporales viejos" FontSize="14"/>
-                    <TextBlock Text="Lo único que no se deshace (no hacen falta)" FontSize="12" Foreground="{StaticResource Muted}" TextWrapping="Wrap"/>
+                    <TextBlock Text="Borrar basura acumulada" FontSize="14"/>
+                    <TextBlock Text="Temporales, descargas viejas de Windows Update e informes de errores. No se deshace (no hacen falta)." FontSize="12" Foreground="{StaticResource Muted}" TextWrapping="Wrap"/>
+                  </StackPanel>
+                </CheckBox>
+                <Rectangle x:Name="LineaPapelera" Height="1" Fill="{StaticResource Line}"/>
+                <CheckBox x:Name="ChkPapelera" Style="{StaticResource Toggle}" Margin="0,14">
+                  <StackPanel>
+                    <TextBlock Text="Vaciar la Papelera" FontSize="14"/>
+                    <TextBlock Text="Revisa antes que no haya nada que quieras recuperar. No se deshace." FontSize="12" Foreground="{StaticResource Muted}" TextWrapping="Wrap"/>
+                  </StackPanel>
+                </CheckBox>
+                <Rectangle x:Name="LineaRam" Height="1" Fill="{StaticResource Line}"/>
+                <CheckBox x:Name="ChkRam" Style="{StaticResource Toggle}" Margin="0,14">
+                  <StackPanel>
+                    <TextBlock Text="Liberar memoria en caché" FontSize="14"/>
+                    <TextBlock x:Name="TxtRam" FontSize="12" Foreground="{StaticResource Muted}" TextWrapping="Wrap"/>
                   </StackPanel>
                 </CheckBox>
               </StackPanel>
@@ -319,6 +334,7 @@
             <TextBlock Text="Revisa esto" FontSize="14" Foreground="{StaticResource Muted}" Margin="0,24,0,10"/>
             <StackPanel x:Name="PanelDiag"/>
           </StackPanel>
+          </ScrollViewer>
           <Button x:Name="BtnOptimizar" Grid.Row="2" Grid.Column="2" Style="{StaticResource Pill}" HorizontalAlignment="Right" Content="Optimizar ahora"/>
         </Grid>
 
