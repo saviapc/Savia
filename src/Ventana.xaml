@@ -280,15 +280,21 @@
           <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
           <StackPanel Grid.ColumnSpan="3">
             <Button x:Name="BtnVolver1" Style="{StaticResource Ghost}" Content="← volver" HorizontalAlignment="Left" Margin="-18,0,0,8"/>
-            <TextBlock FontSize="34" FontWeight="Light" Text="Lo que arranca contigo"/>
+            <TextBlock FontSize="34" FontWeight="Light" Text="Lo que sobra en tu PC"/>
             <TextBlock Margin="0,8,0,22" FontSize="14" Foreground="{StaticResource Muted}" TextWrapping="Wrap"
-                       Text="Estos programas se abren solos al encender el PC. Dejé marcados los que no aportan nada mientras juegas; tú decides."/>
+                       Text="Programas que arrancan solos y apps que Windows trae de serie. Dejé marcados los que no aportan nada mientras juegas; tú decides."/>
           </StackPanel>
           <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden">
             <ScrollViewer.OpacityMask>
               <LinearGradientBrush StartPoint="0,0" EndPoint="0,1"><GradientStop Color="Black" Offset="0"/><GradientStop Color="Black" Offset="0.88"/><GradientStop Color="Transparent" Offset="1"/></LinearGradientBrush>
             </ScrollViewer.OpacityMask>
-            <StackPanel x:Name="ListaInicio" Margin="0,0,0,40"/>
+            <StackPanel Margin="0,0,0,40">
+              <TextBlock Text="Programas que se abren al encender" FontSize="14" Foreground="{StaticResource Muted}" Margin="0,0,0,12"/>
+              <StackPanel x:Name="ListaInicio"/>
+              <TextBlock Text="Apps que vienen con Windows" FontSize="14" Foreground="{StaticResource Muted}" Margin="0,22,0,4"/>
+              <TextBlock Text="Se quitan solo para tu usuario y se pueden recuperar desde el historial." FontSize="12" Foreground="#6A675F" Margin="0,0,0,12"/>
+              <StackPanel x:Name="ListaApps"/>
+            </StackPanel>
           </ScrollViewer>
           <StackPanel Grid.Row="1" Grid.Column="2">
             <TextBlock Text="Opciones" FontSize="14" Foreground="{StaticResource Muted}" Margin="0,0,0,14"/>

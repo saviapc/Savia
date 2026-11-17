@@ -347,6 +347,7 @@ namespace Savia
                 case "Tarea": return string.Format("tarea {0}{1} desactivada", c["Ruta"], c["Nombre"]);
                 case "PlanEnergia": return string.Format("plan {0} -> {1}", c["Anterior"], c["Nuevo"]);
                 case "Pantalla": return string.Format("pantalla {0} Hz -> {1} Hz", c["Anterior"], c["Nuevo"]);
+                case "App": return string.Format("app {0} quitada", c["Nombre"]);
             }
             return "";
         }
@@ -450,6 +451,7 @@ namespace Savia
                         case "PlanEnergia":
                             if (c["Anterior"] != null) { string o; Ejecutar("powercfg.exe", "/setactive " + c["Anterior"], out o); }
                             break;
+                        case "App": Apps.Recuperar((string)c["Familia"]); break;
                         case "Pantalla":
                         {
                             int r2 = Pantalla.Poner(Convert.ToInt32(c["Anterior"]));

@@ -30,6 +30,7 @@ namespace Savia
         Hardware hw;
         List<ProgramaInicio> inicio = new List<ProgramaInicio>();
         List<Hallazgo> diag = new List<Hallazgo>();
+        List<AppPreinstalada> apps = new List<AppPreinstalada>();
         string perfilElegido;
         string reporteFinal;
         FrameworkElement vistaActual, vistaSaliente;
@@ -53,7 +54,7 @@ namespace Savia
             using (Stream st = Assembly.GetExecutingAssembly().GetManifestResourceStream("Savia.Ventana.xaml"))
                 Win = (Window)XamlReader.Load(st);
             foreach (string n in new[] { "Arco", "Blob1", "Blob2", "Blob3", "BtnCerrar", "BtnContinuar", "BtnHistorial", "BtnMin", "BtnOptimizar", "BtnReporte",
-                "BtnVolver1", "BtnVolver2", "BtnVolver3", "Chips", "ChkEfectos", "ChkLimpieza", "ChkSimular", "ListaHistorial", "ListaInicio", "Log", "PanelDiag",
+                "BtnVolver1", "BtnVolver2", "BtnVolver3", "Chips", "ChkEfectos", "ChkLimpieza", "ChkSimular", "ListaHistorial", "ListaInicio", "ListaApps", "Log", "PanelDiag",
                 "PanelFinal", "PanelMedicion", "Pulso", "Root", "ScrollLog", "Tarjetas", "TitleBar", "TxtEfectos", "TxtEstado", "TxtPorcentaje", "TxtResumenPerfil",
                 "TxtSubEstado", "VistaAjustes", "VistaHistorial", "VistaInicio", "VistaProgreso" })
                 ui[n] = Win.FindName(n);
@@ -188,15 +189,20 @@ namespace Savia
 
         Border FilaInicio(ProgramaInicio p, int indice)
         {
+            string motivo = p.Recomendacion ?? (p.Protegido ? "Necesario (antitrampas, controlador, seguridad o periférico). Mejor no quitarlo."
+                                                            : "No es de los que suelen sobrar. Quítalo solo si sabes que no lo usas.");
+            return FilaToggle(System.Text.RegularExpressions.Regex.Replace(p.Nombre, @"\.lnk$", ""), motivo, p, p.Recomendacion != null, indice);
+        }
+
+        Border FilaToggle(string titulo, string motivo, object tag, bool marcado, int indice)
+        {
             var fondo = Pincel("#161614");
             var g = new Border { CornerRadius = new CornerRadius(18), Padding = new Thickness(20, 14, 20, 14), Margin = new Thickness(0, 0, 0, 8), Background = fondo };
             g.MouseEnter += (o, e) => fondo.BeginAnimation(SolidColorBrush.ColorProperty, new ColorAnimation((Color)ColorConverter.ConvertFromString("#1E1E1A"), TimeSpan.FromMilliseconds(220)));
             g.MouseLeave += (o, e) => fondo.BeginAnimation(SolidColorBrush.ColorProperty, new ColorAnimation((Color)ColorConverter.ConvertFromString("#161614"), TimeSpan.FromMilliseconds(380)));
-            var cb = new CheckBox { Style = (Style)Win.FindResource("Toggle"), Tag = p, IsChecked = p.Recomendacion != null };
+            var cb = new CheckBox { Style = (Style)Win.FindResource("Toggle"), Tag = tag, IsChecked = marcado };
             var sp = new StackPanel();
-            sp.Children.Add(Texto(System.Text.RegularExpressions.Regex.Replace(p.Nombre, @"\.lnk$", ""), 15));
-            string motivo = p.Recomendacion ?? (p.Protegido ? "Necesario (antitrampas, controlador, seguridad o periférico). Mejor no quitarlo."
-                                                            : "No es de los que suelen sobrar. Quítalo solo si sabes que no lo usas.");
+            sp.Children.Add(Texto(titulo, 15));
             var sub = Texto(motivo, 12, "#8C877C"); sub.Margin = new Thickness(0, 4, 0, 0);
             sp.Children.Add(sub);
             cb.Content = sp;
@@ -264,9 +270,9 @@ namespace Savia
 
             try
             {
-                Hardware h = null; List<ProgramaInicio> progs = null; List<Hallazgo> dg = null;
-                await Task.Run(() => { h = Hardware.Detectar(); progs = Motor.ProgramasInicio().Where(p => p.Activo).ToList(); dg = Diagnostico.Revisar(h); });
-                hw = h; inicio = progs; diag = dg;
+                Hardware h = null; List<ProgramaInicio> progs = null; List<Hallazgo> dg = null; List<AppPreinstalada> ap = null;
+                await Task.Run(() => { h = Hardware.Detectar(); progs = Motor.ProgramasInicio().Where(p => p.Activo).ToList(); dg = Diagnostico.Revisar(h); ap = Apps.Detectar(); });
+                hw = h; inicio = progs; diag = dg; apps = ap;
                 MostrarHardware();
             }
             catch (Exception ex) { Error(ex); }
@@ -294,6 +300,10 @@ namespace Savia
             int i = 0;
             foreach (var p in inicio.OrderBy(p => p.Recomendacion == null).ThenBy(p => p.Nombre)) { lista.Children.Add(FilaInicio(p, i)); i++; }
             if (i == 0) lista.Children.Add(Texto("No hay programas que se abran solos al encender. Nada que limpiar aquí.", 14, "#8C877C"));
+            var la = E<Panel>("ListaApps");
+            la.Children.Clear();
+            foreach (var a in apps) { la.Children.Add(FilaToggle(a.Nombre, a.Porque, a, a.Recomendada, i)); i++; }
+            if (apps.Count == 0) la.Children.Add(Texto("Tu Windows no trae apps de las que sobran. Nada que quitar aquí.", 14, "#8C877C"));
 
             var ef = E<CheckBox>("ChkEfectos");
             if (hw.GamaBaja) { ef.IsChecked = true; ef.IsEnabled = false; E<TextBlock>("TxtEfectos").Text = "Recomendado en tu equipo: liberan recursos para el juego."; }
@@ -323,6 +333,8 @@ namespace Savia
             bool sim = E<CheckBox>("ChkSimular").IsChecked == true;
             var elegidos = E<Panel>("ListaInicio").Children.OfType<Border>().Select(b => b.Child as CheckBox)
                 .Where(c => c != null && c.IsChecked == true).Select(c => (ProgramaInicio)c.Tag).ToList();
+            var appsElegidas = E<Panel>("ListaApps").Children.OfType<Border>().Select(b => b.Child as CheckBox)
+                .Where(c => c != null && c.IsChecked == true).Select(c => (AppPreinstalada)c.Tag).ToList();
             bool limpiar = E<CheckBox>("ChkLimpieza").IsChecked == true && !sim;
             var s = new Sesion { Simular = sim, Perfil = perfilElegido, Hw = hw, QuitarEfectos = E<CheckBox>("ChkEfectos").IsChecked == true };
 
@@ -332,7 +344,7 @@ namespace Savia
             E<TextBlock>("TxtEstado").Text = sim ? "Simulando…" : "Optimizando…";
             Paso("Preparando");
             progresoMeta = progresoActual = hechos = 0; PonerArco(0);
-            total = Catalogo.Ajustes.Count + elegidos.Count + 1;
+            total = Catalogo.Ajustes.Count + elegidos.Count + appsElegidas.Count + 1;
             E<Button>("BtnHistorial").IsEnabled = false;
             MostrarVista(E<FrameworkElement>("VistaProgreso"));
 
@@ -362,6 +374,7 @@ namespace Savia
                     PasoAsync("Aplicando ajustes");
                     res.AddRange(Motor.Optimizar(s, avance));
                     res.AddRange(Motor.DesactivarInicio(s, elegidos, avance));
+                    if (appsElegidas.Count > 0) { PasoAsync("Quitando apps preinstaladas"); res.AddRange(Apps.Quitar(s, appsElegidas, avance)); }
                     Motor.GuardarRespaldo(s);
                     if (limpiar) { PasoAsync("Limpiando archivos temporales"); limpieza = Motor.Limpiar(); }
                     PasoAsync("Midiendo de nuevo");
